@@ -298,7 +298,7 @@ def improve_dictionary(file_to_open):
         if len(x) > CONFIG["global"]["wcfrom"] and len(x) < CONFIG["global"]["wcto"]
     ]
 
-    print_to_file(file_to_open + ".cupp.txt", unique_list_finished)
+    print_to_file(file_to_open + ".cupp.txt", unique_list_finished, False)
 
     fajl.close()
 
