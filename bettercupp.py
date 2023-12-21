@@ -169,6 +169,7 @@ def print_cow():
         "           \033[1;31m   ||--|| \033[1;m\033[05m*\033[25m\033[1;m      [ Muris Kurgas | j0rgan@remote-exploit.org ]"
     )
     print(28 * " " + "[ Mebus | https://github.com/Mebus/]\r\n")
+    print(28 * " " + "[ E1tex | https://github.com/E1tex/]\r\n")
 
 
 def version():
@@ -1129,7 +1130,7 @@ def main():
 def get_parser():
     """Create and return a parser (argparse.ArgumentParser instance) for main()
     to use"""
-    parser = argparse.ArgumentParser(description="Common User Passwords Profiler")
+    parser = argparse.ArgumentParser(description="Better Common User Passwords Profiler")
     group = parser.add_mutually_exclusive_group(required=False)
     group.add_argument(
         "-i",
