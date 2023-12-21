@@ -387,42 +387,27 @@ def noninteractive(args):
     lower_args = ['name', 'surname', 'nick', 'wife', 'wifen', 'kid', 'kidn', 'pet', 'company', 'words']
     birth_args = ['birthdate', 'wifeb', 'kidb']
 
-    print(args)
-
     name = args.firstname
     while len(name) == 0 or name == " " or name == "  " or name == "   ":
         print("\r\n[-] You must enter a name at least!")
         sys.exit(1)
     profile["name"] = str(name)
-
     profile["surname"] = args.lastname
     profile["nick"] = args.nickname
-    birthdate = args.birthdate
-    print(birthdate)
-    profile["birthdate"] = birthdate
-
-
+    profile["birthdate"] = args.birthdate
     profile["wife"] = args.partners_firstname
     profile["wifen"] = args.partners_nickname
-    wifeb = args.partners_birthdate
-    profile["wifeb"] = wifeb
-
+    profile["wifeb"] = args.partners_birthdate
     profile["kid"] = args.childs_name
     profile["kidn"] = args.childs_nickname
-    kidb = args.childs_birthdate
-    profile["kidb"] = kidb
-
+    profile["kidb"] = args.childs_birthdate
     profile["pet"] = args.pets_name
     profile["company"] = args.company_name
-
     profile["words"] = args.keywords
-    
-
     profile["spechars1"] = args.special_chars
-
     profile["randnum"] = args.add_random_numbers
     profile["leetmode"] = args.leet_mode
-
+    
     for key,value in profile.items():
         if profile[key] is not None and key in lower_args:
             profile[key] = value.lower()
@@ -433,11 +418,11 @@ def noninteractive(args):
                 profile[key] == str(value)
             elif key == 'words':
                 profile[key] = value.replace(" ", "").split(",")
-                print(key)
-                print(value)
-                print(type(value))
         if profile[key] == None:
-            profile[key] = ''
+            if key != 'words':
+                profile[key] = ''
+            else:
+                profile[key] = ['']
 
 
     generate_wordlist_from_profile(profile)  # generate the wordlist
@@ -503,8 +488,6 @@ def generate_wordlist_from_profile(profile):
 
     wordsup = []
     wordsup = list(map(str.title, profile["words"]))
-    print(wordsup)
-    print(profile["words"])
     word = profile["words"] + wordsup
 
     # reverse a name
