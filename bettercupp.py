@@ -373,9 +373,9 @@ def interactive():
 
     print("\r\n")
 
-    profile["wife"] = input("> Partners) name: ").lower()
-    profile["wifen"] = input("> Partners) nickname: ").lower()
-    wifeb = input("> Partners) birthdate (DDMMYYYY): ")
+    profile["wife"] = input("> Partners name: ").lower()
+    profile["wifen"] = input("> Partners nickname: ").lower()
+    wifeb = input("> Partners birthdate (DDMMYYYY): ")
     while len(wifeb) != 0 and len(wifeb) != 8:
         print("\r\n[-] You must enter 8 digits for birthday!")
         wifeb = input("> Partners birthdate (DDMMYYYY): ")
@@ -848,7 +848,7 @@ def generate_wordlist_from_profile(profile):
         for x in unique_list
         if len(x) < CONFIG["global"]["wcto"] and len(x) > CONFIG["global"]["wcfrom"]
     ]
-    if profile["output_file"] and profile["noninteractive"]:
+    if profile.get("output_file") and profile.get("noninteractive"):
 
         if profile[args_dict.get(profile.get("output_file"))] == '':
             print(f'[-] Failed to create file with name of {profile["output_file"]}')
