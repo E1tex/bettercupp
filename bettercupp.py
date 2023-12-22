@@ -859,6 +859,8 @@ def generate_wordlist_from_profile(profile):
             with open('not_found.log', 'a') as log:
                 log.write(f"{profile.get('output_file')} wasn't found for this user:\n{profile}\n\n")
         else:
+            if profile[args_dict.get(profile.get("output_file"))] not in ni_args:
+                sys.exit(f'[-] You need to use one of existing arguments with -ofn\n Example: -ofn n/nickname/petn/pets_name')
             file_to_write = profile[args_dict.get(profile.get("output_file"))]
             print_to_file(file_to_write + ".txt", unique_list_finished, profile["noninteractive"])
     else:
