@@ -47,6 +47,44 @@ __license__ = "GPL"
 __version__ = "3.3.0"
 
 CONFIG = {}
+check_log = True
+
+ni_args = ['noninteractive', 'firstname', 'lastname', 'nickname', 'birthdate', 'partners_firstname', 'partners_nickname', 'partners_birthdate', 'childs_name', 'childs_nickname', 'childs_birthdate', 'pets_name', 'company_name', 'keywords', 'special_chars', 'add_random_numbers', 'leet_mode']
+lower_args = ['name', 'surname', 'nick', 'wife', 'wifen', 'kid', 'kidn', 'pet', 'company', 'words']
+birth_args = ['birthdate', 'wifeb', 'kidb']
+args_dict = {
+    "firstname":"name",
+    "lastname":"surname",
+    "nickname":"nick",
+    "birthdate":"birthdate",
+    "partners_firstname":"wife",
+    "partners_nickname":"wifen",
+    "partners_birthdate":"wifeb",
+    "childs_name":"kid",
+    "childs_nickname":"kidn",
+    "childs_birthdate":"kidb",
+    "pets_name":"pet",
+    "company_name":"company",
+    "keywords":"words",
+    "special_chars":"spechars1",
+    "add_random_numbers":"randnum",
+    "leet_mode":"leetmode",
+    "noninteractive":"",
+    "fn":"name",
+    "ln":"surname",
+    "n":"nick",
+    "bd":"birthdate",
+    "pfn":"wife",
+    "pn":"wifen",
+    "pbd":"wifeb",
+    "cn":"kid",
+    "cni":"kidn",
+    "cbd":"kidb",
+    "petn":"pet",
+    "cin":"company"
+}
+
+
 
 
 def read_config(filename):
@@ -152,13 +190,14 @@ def print_to_file(filename, unique_list_finished, ni_mode):
     print(
         "[+] Now load your pistolero with \033[1;31m"
         + filename
-        + "\033[1;m and shoot! Good luck!"
+        + "\033[1;m and shoot! Good luck! \n"
     )
 
 
 def print_cow():
-    print(" ___________ ")
-    print(" \033[07m  cupp.py! \033[27m                # \033[07mC\033[27mommon")
+    print("___________ ")
+    print("                            # \033[07mB\033[27metter")
+    print(" \033[07m  bettercupp.py! \033[27m          # \033[07mC\033[27mommon")
     print("      \                     # \033[07mU\033[27mser")
     print("       \   \033[1;31m,__,\033[1;m             # \033[07mP\033[27masswords")
     print(
@@ -303,6 +342,9 @@ def improve_dictionary(file_to_open):
     fajl.close()
 
 
+
+
+
 def interactive():
     """Implementation of the -i switch. Interactively question the user and
     create a password dictionary file based on the answer."""
@@ -375,22 +417,15 @@ def interactive():
 
     generate_wordlist_from_profile(profile)  # generate the wordlist
 
-def noninteractive(args):
-    """Implementation of the -i switch. Interactively question the user and
-    create a password dictionary file based on the answer."""
-
-    # We need some information first!
+def list_from_args(args):
     profile = {}
 
     profile["noninteractive"] = True
 
-    lower_args = ['name', 'surname', 'nick', 'wife', 'wifen', 'kid', 'kidn', 'pet', 'company', 'words']
-    birth_args = ['birthdate', 'wifeb', 'kidb']
-
     name = args.firstname
     while len(name) == 0 or name == " " or name == "  " or name == "   ":
         print("\r\n[-] You must enter a name at least!")
-        sys.exit(1)
+        sys.exit("Exiting.")
     profile["name"] = str(name)
     profile["surname"] = args.lastname
     profile["nick"] = args.nickname
@@ -407,14 +442,55 @@ def noninteractive(args):
     profile["spechars1"] = args.special_chars
     profile["randnum"] = args.add_random_numbers
     profile["leetmode"] = args.leet_mode
-    
+
+    return profile
+
+def read_file(file_to_open):
+
+    if os.path.isfile(file_to_open):
+
+        with open(file_to_open, 'r') as file:
+            profile_content = file.read()
+            return(profile_content)
+        
+    else:
+        print("Profile file " + file_to_open + " not found!")
+        sys.exit("Exiting.")
+
+def list_from_file(args, profile_content):
+    profile_list = profile_content.split('\n')
+    args_list = {}
+    for arg in vars(args):
+        args_list[arg] = getattr(args, arg)
+    try:
+        for user in profile_list:
+            user_profile = {}
+            profile_values = user.split(':')
+            for key,value in args_list.items():
+                try:
+                    if not (key == "profile_file" or key == "noninteractive" or key == "output_file") and value:
+                        intvalue = int(value)
+                        user_profile[args_dict.get(key)] = profile_values[intvalue]
+                    else:
+                        user_profile[args_dict.get(key)] = value
+                except TypeError:
+                    pass
+            user_profile["noninteractive"] = True
+            user_profile["output_file"] = args.output_file
+            user_profile = modify_values(user_profile)
+            generate_wordlist_from_profile(user_profile)
+    except IndexError:
+        pass
+
+
+def modify_values(profile):
     for key,value in profile.items():
         if profile[key] is not None and key in lower_args:
             profile[key] = value.lower()
             if key in birth_args:
                 while len(profile[key]) != 0 and len(profile[key]) != 8:
                     print("\r\n[-] You must enter 8 digits for birthday!")
-                    sys.exit(1)
+                    sys.exit("Exiting.")
                 profile[key] == str(value)
             elif key == 'words':
                 profile[key] = value.replace(" ", "").split(",")
@@ -423,13 +499,28 @@ def noninteractive(args):
                 profile[key] = ''
             else:
                 profile[key] = ['']
+    return profile
 
 
-    generate_wordlist_from_profile(profile)  # generate the wordlist
+def noninteractive(args):
+    """Implementation of the -i switch. Interactively question the user and
+    create a password dictionary file based on the answer."""
+
+    # We need some information first!
+
+    if not args.profile_file:
+        profile = list_from_args(args)
+        profile = modify_values(profile)
+        generate_wordlist_from_profile(profile)
+        
+    else:
+        file_content = read_file(args.profile_file)
+        profile = list_from_file(args, file_content)
 
 def generate_wordlist_from_profile(profile):
     """ Generates a wordlist from a given profile """
 
+    global check_log
     chars = CONFIG["global"]["chars"]
     years = CONFIG["global"]["years"]
     numfrom = CONFIG["global"]["numfrom"]
@@ -443,8 +534,8 @@ def generate_wordlist_from_profile(profile):
                 profile["spechars"].append(spec1 + spec2)
                 for spec3 in chars:
                     profile["spechars"].append(spec1 + spec2 + spec3)
-
-    print("\r\n[+] Now making a dictionary...")
+    if not profile['noninteractive']:
+        print("\r\n[+] Now making a dictionary...")
 
     # Now me must do some string modifications...
 
@@ -695,7 +786,8 @@ def generate_wordlist_from_profile(profile):
         komb005 = list(komb(word, profile["spechars"]))
         komb006 = list(komb(reverse, profile["spechars"]))
 
-    print("[+] Sorting list and removing duplicates...")
+    if not profile['noninteractive']:
+        print("[+] Sorting list and removing duplicates...")
 
     komb_unique = {}
     for i in range(1, 22):
@@ -756,8 +848,22 @@ def generate_wordlist_from_profile(profile):
         for x in unique_list
         if len(x) < CONFIG["global"]["wcto"] and len(x) > CONFIG["global"]["wcfrom"]
     ]
+    if profile["output_file"] and profile["noninteractive"]:
 
-    print_to_file(profile["name"] + ".txt", unique_list_finished, profile["noninteractive"])
+        if profile[args_dict.get(profile.get("output_file"))] == '':
+            print(f'[-] Failed to create file with name of {profile["output_file"]}')
+            print(f'[Info] Check the not_found.log file\n')
+            if check_log:
+                os.remove('not_found.log')
+                check_log = False
+            with open('not_found.log', 'a') as log:
+                log.write(f"{profile.get('output_file')} wasn't found for this user:\n{profile}\n\n")
+        else:
+            file_to_write = profile[args_dict.get(profile.get("output_file"))]
+            print_to_file(file_to_write + ".txt", unique_list_finished, profile["noninteractive"])
+    else:
+        file_to_write = profile["name"]
+        print_to_file(file_to_write + ".txt", unique_list_finished, profile["noninteractive"])
 
 
 def download_http(url, targetfile):
@@ -1079,23 +1185,19 @@ def main():
 
 
     read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cupp.cfg"))
-    ni_args = ['noninteractive', 'firstname', 'lastname', 'nickname', 'birthdate', 'partners_firstname', 'partners_nickname', 'partners_birthdate', 'childs_name', 'childs_nickname', 'childs_birthdate', 'pets_name', 'company_name', 'keywords', 'special_chars', 'add_random_numbers', 'leet_mode']
     parser = get_parser()
     args = parser.parse_args()
-    if args.interactive:
+
+    if not args.quiet:
+        print_cow()
+    if args.version:
+        version()
+    elif args.interactive:
         for arg_name in ni_args:
             arg_value = getattr(args, arg_name, None)
             if arg_value is not None and arg_value is not False:
                 print("\r\n[-] You need to use --noninteractive with noninteractive flags specified")
-                sys.exit(1)
-
-
-    if not args.quiet:
-        print_cow()
-
-    if args.version:
-        version()
-    elif args.interactive:
+                sys.exit("Exiting.")
         interactive()
     elif args.noninteractive:
         noninteractive(args)
@@ -1121,7 +1223,6 @@ def get_parser():
         action="store_true",
         help="Interactive questions for user password profiling",
     )
-    #__________________________________________
     group.add_argument(
         "-ni",
         "--noninteractive",
@@ -1211,7 +1312,16 @@ def get_parser():
         action="store_true",
         help="Leet mode"
     )
-    #__________________________________________
+    parser.add_argument(
+        "-pf",
+        "--profile_file",
+        help="Profile File \n Example: bettercupp.py -ni -fn 0 -ln 2 -bd 1 -pf test.txt \n File Content Example: Ivan:12122012:Pupkin"
+    )
+    parser.add_argument(
+        "-ofn",
+        "--output_file",
+        help="Specify value that will be used in output file name \n Example: bettercupp.py -ni -fn 0 -ln 2 -bd 1 -pf test.txt -ofn nickname"
+    )
     group.add_argument(
         "-w",
         dest="improve",
