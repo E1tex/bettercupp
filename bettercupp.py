@@ -53,6 +53,7 @@ check_log = True
 ni_args = ['noninteractive', 'firstname', 'lastname', 'nickname', 'birthdate', 'partners_firstname', 'partners_nickname', 'partners_birthdate', 'childs_name', 'childs_nickname', 'childs_birthdate', 'pets_name', 'company_name', 'keywords', 'special_chars', 'add_random_numbers', 'leet_mode', 'output_file', 'profile_file', 'ni', 'fn', 'ln', 'n', 'bd', 'pfn', 'pn', 'pbd', 'cn', 'cni', 'cbd', 'petn', 'cin', 'kw', 'sc', 'rn', 'lm', 'ofn', 'pf']
 lower_args = ['name', 'surname', 'nick', 'wife', 'wifen', 'kid', 'kidn', 'pet', 'company', 'words']
 birth_args = ['birthdate', 'wifeb', 'kidb']
+boolean_args = ['special_chars', 'add_random_numbers', 'leet_mode']
 args_dict = {
     "firstname":"name",
     "lastname":"surname",
@@ -473,7 +474,7 @@ def list_from_file(args, profile_content):
         profile_values = user.split(':')
         for key,value in args.items():
             try:
-                if not (key == "profile_file" or key == "noninteractive" or key == "output_file"):
+                if not (key == "profile_file" or key == "noninteractive" or key == "output_file" or key in boolean_args):
                     intvalue = int(value)
                     user_profile[args_dict.get(key)] = profile_values[intvalue]
                 else:
