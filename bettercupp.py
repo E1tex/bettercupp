@@ -505,6 +505,9 @@ def modify_values(profile):
                 profile[key] = ''
             else:
                 profile[key] = ['']
+        elif profile[key] == True:
+            profile[key] = 'y'
+
     return profile
 
 
