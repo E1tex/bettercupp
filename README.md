@@ -17,12 +17,19 @@ $ python3 bettercupp.py -h
 
 ## Options
 
-Usage: bettercupp.py [OPTIONS]
+usage: bettercupp.py [-h] [-i] [-ni] [-fn FIRSTNAME] [-ln LASTNAME]
+                     [-n NICKNAME] [-bd BIRTHDATE] [-pfn PARTNERS_FIRSTNAME]
+                     [-pn PARTNERS_NICKNAME] [-pbd PARTNERS_BIRTHDATE]
+                     [-cn CHILDS_NAME] [-cni CHILDS_NICKNAME]
+                     [-cbd CHILDS_BIRTHDATE] [-petn PETS_NAME]
+                     [-cin COMPANY_NAME] [-kw KEYWORDS] [-sc] [-rn] [-lm]
+                     [-pf PROFILE_FILE] [-ofn OUTPUT_FILE] [-w FILENAME] [-l]
+                     [-a] [-v] [-q]
 
-```
-    Better Common User Passwords Profiler
+Better Common User Passwords Profiler
 
 optional arguments:
+```
   -h, --help            show this help message and exit
   -i, --interactive     Interactive questions for user password profiling
   -ni, --noninteractive
@@ -57,6 +64,14 @@ optional arguments:
   -rn, --add_random_numbers
                         Random numbers at the end of words
   -lm, --leet_mode      Leet mode
+  -pf PROFILE_FILE, --profile_file PROFILE_FILE
+                        Profile File Example: bettercupp.py -ni -fn 0 -ln 2
+                        -bd 1 -pf test.txt File Content Example:
+                        Ivan:12122012:Pupkin
+  -ofn OUTPUT_FILE, --output_file OUTPUT_FILE
+                        Specify value that will be used in output file name
+                        Example: bettercupp.py -ni -fn 0 -ln 2 -bd 1 -pf
+                        test.txt -ofn nickname
   -w FILENAME           Use this option to improve existing dictionary, or
                         WyD.pl output to make some pwnsauce
   -l                    Download huge wordlists from repository
@@ -65,8 +80,20 @@ optional arguments:
                         Phenoelit and CIRT which were merged and enhanced
   -v, --version         Show the version of this program.
   -q, --quiet           Quiet mode (don't print banner)
-```
+  ```
 
+## Non-Interactive Mode Example
+Command:
+```
+python3 ./bettercupp.py -ni -ofn pet_name -pf profiletest.txt -n 0 -fn 1 -ln 2
+```
+profiletest.txt:
+```
+nick1:Ivan:Spiridonov
+nick2:Vasya:Pupkin
+...
+nickname:Name:Surname
+```
 
 ## Configuration
 
