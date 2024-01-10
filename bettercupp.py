@@ -47,9 +47,10 @@ __license__ = "GPL"
 __version__ = "3.3.0"
 
 CONFIG = {}
+NOT_FIND_FILE = "not_found.log"
 check_log = True
 
-ni_args = ['noninteractive', 'firstname', 'lastname', 'nickname', 'birthdate', 'partners_firstname', 'partners_nickname', 'partners_birthdate', 'childs_name', 'childs_nickname', 'childs_birthdate', 'pets_name', 'company_name', 'keywords', 'special_chars', 'add_random_numbers', 'leet_mode']
+ni_args = ['noninteractive', 'firstname', 'lastname', 'nickname', 'birthdate', 'partners_firstname', 'partners_nickname', 'partners_birthdate', 'childs_name', 'childs_nickname', 'childs_birthdate', 'pets_name', 'company_name', 'keywords', 'special_chars', 'add_random_numbers', 'leet_mode', 'output_file', 'profile_file', 'ni', 'fn', 'ln', 'n', 'bd', 'pfn', 'pn', 'pbd', 'cn', 'cni', 'cbd', 'petn', 'cin', 'kw', 'sc', 'rn', 'lm', 'ofn', 'pf']
 lower_args = ['name', 'surname', 'nick', 'wife', 'wifen', 'kid', 'kidn', 'pet', 'company', 'words']
 birth_args = ['birthdate', 'wifeb', 'kidb']
 args_dict = {
@@ -81,7 +82,10 @@ args_dict = {
     "cni":"kidn",
     "cbd":"kidb",
     "petn":"pet",
-    "cin":"company"
+    "cin":"company",
+    "noninteractive": "noninteractive",
+    "output_file": "output_file",
+    "profile_file": "profile_file"
 }
 
 
@@ -459,28 +463,29 @@ def read_file(file_to_open):
 
 def list_from_file(args, profile_content):
     profile_list = profile_content.split('\n')
-    args_list = {}
-    for arg in vars(args):
-        args_list[arg] = getattr(args, arg)
-    try:
-        for user in profile_list:
-            user_profile = {}
-            profile_values = user.split(':')
-            for key,value in args_list.items():
-                try:
-                    if not (key == "profile_file" or key == "noninteractive" or key == "output_file") and value:
-                        intvalue = int(value)
-                        user_profile[args_dict.get(key)] = profile_values[intvalue]
-                    else:
-                        user_profile[args_dict.get(key)] = value
-                except TypeError:
-                    pass
-            user_profile["noninteractive"] = True
-            user_profile["output_file"] = args.output_file
-            user_profile = modify_values(user_profile)
-            generate_wordlist_from_profile(user_profile)
-    except IndexError:
-        pass
+    unique_keys = set(args_dict.keys()).difference(args.keys())
+    for user in profile_list:
+        if user == '':
+            continue
+        user_profile = {}
+        for key in list(unique_keys):
+            user_profile[args_dict[key]] = ''
+        profile_values = user.split(':')
+        for key,value in args.items():
+            try:
+                if not (key == "profile_file" or key == "noninteractive" or key == "output_file"):
+                    intvalue = int(value)
+                    user_profile[args_dict.get(key)] = profile_values[intvalue]
+                else:
+                    user_profile[args_dict.get(key)] = value
+            except TypeError:
+                pass
+            except IndexError:
+                pass
+        user_profile["noninteractive"] = True
+        user_profile["output_file"] = args.get('output_file')
+        user_profile = modify_values(user_profile)
+        generate_wordlist_from_profile(user_profile)
 
 
 def modify_values(profile):
@@ -503,18 +508,14 @@ def modify_values(profile):
 
 
 def noninteractive(args):
-    """Implementation of the -i switch. Interactively question the user and
-    create a password dictionary file based on the answer."""
 
-    # We need some information first!
-
-    if not args.profile_file:
+    if not args.get('profile_file'):
         profile = list_from_args(args)
         profile = modify_values(profile)
         generate_wordlist_from_profile(profile)
         
     else:
-        file_content = read_file(args.profile_file)
+        file_content = read_file(args.get('profile_file'))
         profile = list_from_file(args, file_content)
 
 def generate_wordlist_from_profile(profile):
@@ -849,17 +850,17 @@ def generate_wordlist_from_profile(profile):
         if len(x) < CONFIG["global"]["wcto"] and len(x) > CONFIG["global"]["wcfrom"]
     ]
     if profile.get("output_file") and profile.get("noninteractive"):
-
-        if profile[args_dict.get(profile.get("output_file"))] == '':
+        if profile.get(args_dict.get(profile.get("output_file"))) == '':
+            print(args_dict.get(profile.get("output_file")))
             print(f'[-] Failed to create file with name of {profile["output_file"]}')
-            print(f'[Info] Check the not_found.log file\n')
-            if check_log:
-                os.remove('not_found.log')
+            print(f'[Info] Check the {NOT_FIND_FILE} file\n')
+            if check_log and os.path.isfile(NOT_FIND_FILE):
+                os.remove(NOT_FIND_FILE)
                 check_log = False
-            with open('not_found.log', 'a') as log:
+            with open(NOT_FIND_FILE, 'a') as log:
                 log.write(f"{profile.get('output_file')} wasn't found for this user:\n{profile}\n\n")
         else:
-            if profile[args_dict.get(profile.get("output_file"))] not in ni_args:
+            if profile.get("output_file") not in ni_args:
                 sys.exit(f'[-] You need to use one of existing arguments with -ofn\n Example: -ofn n/nickname/petn/pets_name')
             file_to_write = profile[args_dict.get(profile.get("output_file"))]
             print_to_file(file_to_write + ".txt", unique_list_finished, profile["noninteractive"])
@@ -1189,20 +1190,18 @@ def main():
     read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cupp.cfg"))
     parser = get_parser()
     args = parser.parse_args()
-
+    used_arguments = {k: v for k, v in vars(args).items() if v is not None and v is not False}
     if not args.quiet:
         print_cow()
     if args.version:
         version()
     elif args.interactive:
-        for arg_name in ni_args:
-            arg_value = getattr(args, arg_name, None)
-            if arg_value is not None and arg_value is not False:
-                print("\r\n[-] You need to use --noninteractive with noninteractive flags specified")
-                sys.exit("Exiting.")
+        if set(used_arguments.keys()) & set(ni_args):
+            print("\r\n[-] You need to use --noninteractive with noninteractive flags specified")
+            sys.exit("Exiting.")
         interactive()
     elif args.noninteractive:
-        noninteractive(args)
+        noninteractive(used_arguments)
     elif args.download_wordlist:
         download_wordlist()
     elif args.alecto:
@@ -1357,4 +1356,5 @@ def get_parser():
 
 
 if __name__ == "__main__":
+
     main()
